@@ -1,0 +1,380 @@
+[
+    {
+        "id": "b5a32178.96e11",
+        "type": "tab",
+        "label": "Temperature Dashboard",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "43c01e3d.2c4e7",
+        "type": "arduino in",
+        "z": "b5a32178.96e11",
+        "name": "Thermistor (A1)",
+        "pin": "1",
+        "state": "ANALOG",
+        "arduino": "b4543f4.a6ae6c",
+        "x": 180,
+        "y": 160,
+        "wires": [
+            [
+                "fb257528.848868"
+            ]
+        ]
+    },
+    {
+        "id": "c79ab968.259e18",
+        "type": "arduino in",
+        "z": "b5a32178.96e11",
+        "name": "PBS (Pin 3)",
+        "pin": "3",
+        "state": "PULLUP",
+        "arduino": "b4543f4.a6ae6c",
+        "x": 170,
+        "y": 300,
+        "wires": [
+            [
+                "5214b8f7.bfe088"
+            ]
+        ]
+    },
+    {
+        "id": "fb257528.848868",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "Conver Pin(A1) to Celsius",
+        "func": "var code = msg.payload;\nvar celsius;\n\n if (code <= 289) {\n    celsius = 5 + (code - 289) / 9.82;\n  }\n  if (code > 289 && code <= 342) {\n    celsius = 10 + (code - 342) / 10.60;\n  }\n  if (code > 342 && code <= 398) {\n    celsius = 15 + (code - 398) / 11.12;\n  }\n  if (code > 398 && code <= 455) {\n    celsius = 20 + (code - 455) / 11.36;\n  }\n  if (code > 455 && code <= 512) {\n    celsius = 25 + (code - 512) / 11.32;\n  }\n  if (code > 512 && code <= 566) {\n    celsius = 30 + (code - 566) / 11.00;\n  }\n  if (code > 566 && code <= 619) {\n    celsius = 35 + (code - 619) / 10.44;\n  }\n  if (code > 619 && code <= 667) {\n    celsius = 40 + (code - 667) / 9.73;\n  }\n  if (code > 667) {\n    celsius = 45 + (code - 712) / 8.90;\n  }\n  \n  \nmsg.payload = celsius.toFixed(1);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 450,
+        "y": 160,
+        "wires": [
+            [
+                "26137716.431928"
+            ]
+        ]
+    },
+    {
+        "id": "26137716.431928",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "cache temperature",
+        "func": "flow.set('lastTemp',parseFloat(msg.payload));\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 770,
+        "y": 160,
+        "wires": [
+            [
+                "73d5a975.809db8"
+            ]
+        ]
+    },
+    {
+        "id": "73d5a975.809db8",
+        "type": "debug",
+        "z": "b5a32178.96e11",
+        "name": "Celsius (cache)",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "5214b8f7.bfe088",
+        "type": "debounce",
+        "z": "b5a32178.96e11",
+        "time": "500",
+        "name": "Debounce (500 mS)",
+        "x": 380,
+        "y": 300,
+        "wires": [
+            [
+                "a4a41085.d9c3a"
+            ]
+        ]
+    },
+    {
+        "id": "a4a41085.d9c3a",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "cycle PBS Click: 1,2,3,1... ",
+        "func": "var clickCount = flow.get(\"pbsButton\");\n\nif(clickCount == undefined) {\n    clickCount = 0; \n}\nelse{\n    clickCount +=1; \n}\n\nif (clickCount === 4){\n    clickCount = 1;\n}\n\nflow.set(\"pbsButton\",clickCount);\nmsg.payload = clickCount;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 630,
+        "y": 300,
+        "wires": [
+            [
+                "a4cc98a5.53caa8"
+            ]
+        ]
+    },
+    {
+        "id": "a4cc98a5.53caa8",
+        "type": "switch",
+        "z": "b5a32178.96e11",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "3",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 830,
+        "y": 300,
+        "wires": [
+            [
+                "9743900c.55979"
+            ],
+            [
+                "c15120c1.16471"
+            ],
+            [
+                "22a462ea.4b4dce"
+            ]
+        ]
+    },
+    {
+        "id": "9743900c.55979",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "Get chaced temperature",
+        "func": "let temperature = flow.get('lastTemp');\nmsg.payload = parseFloat(temperature);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 290,
+        "y": 440,
+        "wires": [
+            [
+                "46786d6f.5d1e14"
+            ]
+        ]
+    },
+    {
+        "id": "c15120c1.16471",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "Get chaced temperature",
+        "func": "var temperature = flow.get('lastTemp');\nmsg.payload = parseFloat(temperature);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 290,
+        "y": 520,
+        "wires": [
+            [
+                "580d021f.047aec"
+            ]
+        ]
+    },
+    {
+        "id": "22a462ea.4b4dce",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "Get chaced temperature",
+        "func": "var temperature = flow.get('lastTemp');\nmsg.payload = parseFloat(temperature);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 290,
+        "y": 600,
+        "wires": [
+            [
+                "a872e7c2.38f8e8"
+            ]
+        ]
+    },
+    {
+        "id": "46786d6f.5d1e14",
+        "type": "template",
+        "z": "b5a32178.96e11",
+        "name": "Temperature: Celsius",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Temperature: {{payload}}° Celsius",
+        "output": "str",
+        "x": 840,
+        "y": 440,
+        "wires": [
+            [
+                "e7740605.5b0f38"
+            ]
+        ]
+    },
+    {
+        "id": "6f896bf5.8a56b4",
+        "type": "template",
+        "z": "b5a32178.96e11",
+        "name": "Temperature: Fahrenheit",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Temperature: {{payload}}° Fahrenheit",
+        "output": "str",
+        "x": 850,
+        "y": 520,
+        "wires": [
+            [
+                "a222789b.ad2868"
+            ]
+        ]
+    },
+    {
+        "id": "705cb071.e3ef2",
+        "type": "template",
+        "z": "b5a32178.96e11",
+        "name": "Temperature: Kelvin",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Temperature: {{payload}}° Kelvin",
+        "output": "str",
+        "x": 840,
+        "y": 600,
+        "wires": [
+            [
+                "da0827a.6daf3d8"
+            ]
+        ]
+    },
+    {
+        "id": "580d021f.047aec",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "Convert Celsius to Fahrenheit",
+        "func": "let fahrenheit = msg.payload * 1.8 + 32;\nmsg.payload = fahrenheit.toFixed(1);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 570,
+        "y": 520,
+        "wires": [
+            [
+                "6f896bf5.8a56b4"
+            ]
+        ]
+    },
+    {
+        "id": "a872e7c2.38f8e8",
+        "type": "function",
+        "z": "b5a32178.96e11",
+        "name": "Convert Celsius to Kelvin",
+        "func": "let kelvin = msg.payload+273.15;\nmsg.payload= kelvin.toFixed(1);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 570,
+        "y": 600,
+        "wires": [
+            [
+                "705cb071.e3ef2"
+            ]
+        ]
+    },
+    {
+        "id": "a222789b.ad2868",
+        "type": "debug",
+        "z": "b5a32178.96e11",
+        "name": "dispaly: Temperature in Fahrenheit",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1160,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "e7740605.5b0f38",
+        "type": "debug",
+        "z": "b5a32178.96e11",
+        "name": "dispaly: Temperature in Celisus",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "da0827a.6daf3d8",
+        "type": "debug",
+        "z": "b5a32178.96e11",
+        "name": "dispaly: Temperature in Kelvin",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "ac76737b.a041b",
+        "type": "comment",
+        "z": "b5a32178.96e11",
+        "name": "Temperature Flow by Yuliia Topalova(topa0005@algonquinlive.com)",
+        "info": "",
+        "x": 340,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "b4543f4.a6ae6c",
+        "type": "arduino-board",
+        "device": "COM3"
+    }
+]
